@@ -62,3 +62,6 @@ target/
 .project
 .pydevproject
 .settings
+
+.ropeproject
+.DS_Store
