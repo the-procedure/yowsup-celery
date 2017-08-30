@@ -7,26 +7,26 @@ def listening_required(f):
     @wraps(f)
     def decorated_function(self, *args, **kwargs):
         if not self.stack.listening:
-            listen.apply_async(queue=self.request.delivery_info['routing_key'])
+            listen.apply_async(queue=self.app.conf.CELERY_DEFAULT_QUEUE)
             return self.retry()
         else:
             return f(self, *args, **kwargs)
     return decorated_function
 
-   
+
 class YowsupTask(Task):
     abstract = True
     default_retry_delay = 0.5
-    
+
     @property
     def stack(self):
         return self.app.stack
-    
+
     @property
     def facade(self):
         return self.app.stack.facade
-    
-    
+
+
 @shared_task(base=YowsupTask, bind=True, ignore_result=True)
 def listen(self):
     if not self.stack.listening:
@@ -38,7 +38,7 @@ def listen(self):
 @listening_required
 def connect(self):
     return self.facade.connect()
-        
+
 
 @shared_task(base=YowsupTask, bind=True)
 @listening_required
